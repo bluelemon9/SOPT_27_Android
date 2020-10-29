@@ -11,10 +11,6 @@ class ProfileAdapter (private val context : Context) : RecyclerView.Adapter<Prof
     var changeViewType = 1
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ProfileViewHolder {
-//        val view = LayoutInflater.from(context).inflate(
-//            R.layout.item_profile_linear,
-//            parent, false
-
         val view =
             when(viewType){
                 1-> { //리니어

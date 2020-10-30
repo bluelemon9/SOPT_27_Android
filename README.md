@@ -1,5 +1,5 @@
 # :star: 1차 세미나 :star:
-![Alt Text](https://i.imgflip.com/4kegag.gif)
+![Alt Text](https://i.imgflip.com/4ker80.gif)
 
 # [과제1, 성장과제1] 회원가입 및 로그인 기능 (20.10.28)
 

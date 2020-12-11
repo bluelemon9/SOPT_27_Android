@@ -1,6 +1,7 @@
 # :star: 전체 실행 모습 :star:
-![20201211_211304](https://user-images.githubusercontent.com/62381385/101903504-ba179280-3bf7-11eb-84e6-d124a2a20cd6.gif)
+<img src="https://user-images.githubusercontent.com/62381385/101903504-ba179280-3bf7-11eb-84e6-d124a2a20cd6.gif" width="40%">
 
+<br><br>
 
 # :star: 1차 세미나 :star:
 ![Alt Text](https://i.imgflip.com/4kerns.gif)
@@ -251,29 +252,301 @@ rv_profile.layoutManager = GridLayoutManager(this@MainActivity, 2)
 ```
 리사이클러뷰 레이아웃을 선택하여 변경할 수 있도록 onCreateOptionsMenu와 onOptionsItemSelected를 오버라이드한다.  
 -> 코드 참고
+
+- Fragment에서 메뉴 적용시, onCreateView 안에 아래와 같이 있어야 액티비티보다 프레그먼트의 메뉴가 우선시 됨
+```kotlin
+setHasOptionsMenu(true)
+```
  
  <br><br>
 
 # :star: 3차 세미나 :star:  
 # [과제] BottomNavigation, Tablayout (20.12.11)
-![Screenshot_20201211-211710_Video Player](https://user-images.githubusercontent.com/62381385/101903937-68bbd300-3bf8-11eb-9bb8-c639633bdd74.jpg)
-### 1.   
+<img src="https://user-images.githubusercontent.com/62381385/101903937-68bbd300-3bf8-11eb-9bb8-c639633bdd74.jpg" width="30%">   
+
+### 1. Tablayout 적용   
+- fragment_me.xml
+```kotlin
+<com.google.android.material.tabs.TabLayout
+        android:id="@+id/tablayout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/tv_introduce"
+        android:layout_marginTop="50dp"
+        app:tabTextColor="#AFADAD"
+        android:background="#000000"
+        app:tabIndicatorColor="#E1E1E1"
+        app:tabSelectedTextColor="#ffd500">
+    </com.google.android.material.tabs.TabLayout>
+
+    <androidx.viewpager.widget.ViewPager
+        android:id="@+id/tab_viewpager"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/tablayout" >
+```
+<br>
+
+- MeFragment.kt
+```kotlin
+val tabAdapter = TabAdapter(childFragmentManager)
+        tab_viewpager.adapter = tabAdapter
+
+        // Tablayout과 연동
+        tablayout.setupWithViewPager(tab_viewpager)
+        tablayout.apply {
+            getTabAt(0)?.text = "INFO"
+            getTabAt(1)?.text = "OTHER"
+        }
+```
 
 <br><br>
+
 # :star: 6차 세미나 :star:  
 # [과제] 회원가입, 로그인 서버 연결 (20.12.11)
-![signup](https://user-images.githubusercontent.com/62381385/101904964-04017800-3bfa-11eb-83ce-35b6e5e03f9a.JPG)
-![Screenshot_20201211-211629_Video Player](https://user-images.githubusercontent.com/62381385/101903923-63f71f00-3bf8-11eb-89ed-ba8c26af4732.jpg)
-![Screenshot_20201211-211710_Video Player](https://user-images.githubusercontent.com/62381385/101903937-68bbd300-3bf8-11eb-9bb8-c639633bdd74.jpg)
+<img src="https://user-images.githubusercontent.com/62381385/101915891-92312a80-3c09-11eb-836e-f1a4c753237a.JPG" width="50%">
+<img src="https://user-images.githubusercontent.com/62381385/101903923-63f71f00-3bf8-11eb-89ed-ba8c26af4732.jpg" width="30%">
+<img src="https://user-images.githubusercontent.com/62381385/101903937-68bbd300-3bf8-11eb-9bb8-c639633bdd74.jpg" width="30%">
+
+### 1. 라이브러리 추가   
+
+### 2. API문서 보고 Request / Response 객체 설계   
+- RequestSignIn.kt
+```kotlin
+data class RequestSignIn(
+    val email: String,
+    val password : String
+)
+```
+
+- ResponseSignIn.kt
+```kotlin
+data class ResponseSignIn(
+    val status: Int,
+    val success : Boolean,
+    val message : String,
+    val data: SomeData
+)
+
+data class SomeData(
+    val email: String,
+    val password: String,
+    val userName: String
+)
+```
+
+<br>   
+
+### 3. Retrofit Interface 설계   
+- SignInInterface.kt
+```kotlin
+interface SignInInterface {
+    @Headers("Content-Type:application/json")
+    @POST("/users/signin")
+    fun requestSignIn(@Body body: RequestSignIn): Call<ResponseSignIn>
+}
+```
+
+<br>
+
+### 4. Retrofit Interface 실제 구현체 만들기   
+- SignServiceImpl.kt
+```kotlin
+object SignServiceImpl {
+    private const val BASE_URL = "http://15.164.83.210:3000/"
+    private val retrofit : Retrofit = Retrofit.Builder()
+        .baseUrl(BASE_URL)
+        .addConverterFactory(GsonConverterFactory.create())
+        .build()
+
+    val signinservice : SignInInterface = retrofit.create(SignInInterface::class.java)
+    val signupservice : SignUpInterface = retrofit.create(SignUpInterface::class.java)
+}
+```
+
+<br>
+
+### 5. Callback 등록하며 통신 요청   
+- SignInActivity.kt
+```kotlin
+// 서버 통신
+                SignServiceImpl.signinservice.requestSignIn(
+                    RequestSignIn(
+                        email = et_id.text.toString(),
+                        password = et_pw.text.toString()
+                    )
+                ).enqueue(object : Callback<ResponseSignIn> {
+                    override fun onResponse(
+                        call: Call<ResponseSignIn>,
+                        response: Response<ResponseSignIn>
+                    ) {
+                        if (response.isSuccessful) {
+                            Toast.makeText(this@SignInActivity, "로그인 되었습니다.", Toast.LENGTH_SHORT).show()
+                            val intent = Intent(this@SignInActivity, MainActivity::class.java)
+                            startActivity(intent)
+                        }else {
+                            showError(response.errorBody())
+                        }
+                    }
+                    override fun onFailure(call: Call<ResponseSignIn>, t: Throwable) {
+                        Toast.makeText(this@SignInActivity, "로그인 실패", Toast.LENGTH_SHORT).show()
+                    }
+                })
+```
 
 <br>
 
 # [성장과제1] 더미데이터 사이트 서버 연결 (20.12.11)   
-![Screenshot_20201211-211710_Video Player](https://user-images.githubusercontent.com/62381385/101903937-68bbd300-3bf8-11eb-9bb8-c639633bdd74.jpg)
-![Screenshot_20201211-212208_Video Player](https://user-images.githubusercontent.com/62381385/101903934-66f20f80-3bf8-11eb-9608-a0a6a7dd0707.jpg)
+<img src="https://user-images.githubusercontent.com/62381385/101903934-66f20f80-3bf8-11eb-9608-a0a6a7dd0707.jpg" width="30%">
 
-<br>   
+<br>
+
+
+### 2. GET 형식이고 보내는 것이 없으므로 Request 객체는 작성 X   
+### 3. Interface 설계(Body 없음)
+- PracticeInterface.kt
+```kotlin
+interface PracticeInterface {
+    @GET("/api/users?page=2")
+    fun requestPractice(): Call<ResponsePractice>
+}
+```
+
+<br>
+
+### 5. Callback 등록하며 통신 요청 
+#### 더미에서 서버 연결로 바꿀경우: ViewHolder, Adapter, 메인코드 서버 적용 방식 바꿔줘야 함!!
+- PortFolioFragment.kt
+```kotlin
+override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+
+        var datas: MutableList<ProfileData> = mutableListOf<ProfileData>()
+
+        // 서버 연결
+        profileAdapter= ProfileAdapter(view!!.context, datas)
+
+
+        // 어댑터에 context 객체를 파라미터로 전달 (더미)
+//        profileAdapter = ProfileAdapter(view.context)
+
+        rv_profile.adapter = profileAdapter
+        rv_profile.layoutManager = LinearLayoutManager(view.context)
+
+        // 서버 요청
+        PracticeServiceImpl.service.requestPractice(
+        ).enqueue(object : Callback<ResponsePractice> {
+            override fun onFailure(call: Call<ResponsePractice>, t: Throwable) {
+                Log.d("연습용 서버 연결 실패", "${t}")
+            }
+
+            override fun onResponse(
+                call: Call<ResponsePractice>,
+                response: Response<ResponsePractice>
+            ) {
+                // 통신 성공
+                if (response.isSuccessful) {   // statusCode가 200-300 사이일 때, 응답 body 이용 가능
+                    Log.d("받아온 데이터 ", response.body()!!.data.toString())
+
+                    var i: Int = 0
+                    for (i in 0 until response.body()!!.data.size) {
+
+                        datas.apply {
+                            add(
+                                ProfileData(
+                                    email = "${response.body()!!.data[i].email}",
+                                    first_name = "${response.body()!!.data[i].first_name}",
+                                    avatar = "${response.body()!!.data[i].avatar}"
+                                )
+                            )
+                        }
+                        profileAdapter.notifyDataSetChanged()
+                    }
+                } else {
+                    Log.d("연습용 서버 연결 실패2", "${response.message()}")
+                }
+            }
+        })
+```
+
+<br>
+
+- ProfileViewHolder.kt      
+```kotlin
+    fun onBind(profiledata : ProfileData){
+        title.text = profiledata.first_name
+        subtitle.text = profiledata.email
+        Glide.with(itemView).load(profiledata.avatar).into(photo)
+
+//        //더미용
+//        title.text = profiledata.title
+//        subtitle.text = profiledata.subtitle
+
+        //프로필 아이템 버튼 클릭 이벤트 (상세정보)
+        profile_item.setOnClickListener(object :View.OnClickListener {
+            override fun onClick(v: View?) {
+                val context: Context = v!!.context
+                val detailIntent = Intent(v!!.context, ProfileDetatilActivity::class.java)
+
+                detailIntent.putExtra("title",profiledata.first_name)
+                detailIntent.putExtra("subtitle",profiledata.email)
+
+//                detailIntent.putExtra("title",profiledata.title)
+//                detailIntent.putExtra("subtitle",profiledata.subtitle)
+                context.startActivity(detailIntent)
+            }
+        })
+```
+
+<br>
+
+- ProfileAdapter.kt      
+```kotlin
+/ 서버 연동
+class ProfileAdapter(private val context : Context, var datas : List<ProfileData>) : RecyclerView.Adapter<ProfileViewHolder>() {
+
+// 더미
+//class ProfileAdapter (private val context : Context) : RecyclerView.Adapter<ProfileViewHolder>() {
+//    var data = mutableListOf<ProfileData>()
+
+...
+
+//    override fun getItemCount(): Int = data.size
+//
+//    override fun onBindViewHolder(holder: ProfileViewHolder, position: Int) {
+//        holder.onBind(data[position])
+//    }
+
+    override fun getItemCount(): Int = datas.size
+
+    override fun onBindViewHolder(holder: ProfileViewHolder, position: Int) {
+        holder.onBind(datas[position])
+    }
+```
+
+<br>
 
 # [성장과제2] 카카오 웹 검색 API (20.12.11)   
-![Screenshot_20201211-212224_Video Player](https://user-images.githubusercontent.com/62381385/101905100-40cd6f00-3bfa-11eb-9eb0-252b06273f09.jpg)
+<img src="https://user-images.githubusercontent.com/62381385/101905100-40cd6f00-3bfa-11eb-9eb0-252b06273f09.jpg" width="30%">   
+
+<br>
+
+구현 방식은 성장과제1과 유사함.   
+
+<br>
+
+카카오 api 주소
+https://developers.kakao.com/docs/latest/ko/daum-search/dev-guide#search-doc
+
+
+### [1] 리사이클러뷰 만들기
+-> @headers로 키값 넣어주고 @query로 검색할 키워드 넣을 수 있게 함.   
+
+### [2] Retrofit을 이용하여 서버 통신   
+-> SettingFragment.kt에서 edittext의 addTextChangedListener을 이용하여 텍스트 변화를 감지한다.
+변화가 감지될 때마다 loadDatas(searchtext.toString())를 통해 서버와 통신을 하게 된다
       

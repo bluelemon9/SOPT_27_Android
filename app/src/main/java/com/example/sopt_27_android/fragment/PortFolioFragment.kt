@@ -1,35 +1,38 @@
-package com.example.sopt_27_android
+package com.example.sopt_27_android.fragment
 
-import android.content.Context
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import android.view.Menu
-import android.view.MenuItem
+import android.view.*
+import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.sopt_27_android.ProfileRV.ProfileAdapter
 import com.example.sopt_27_android.ProfileRV.ProfileData
-import kotlinx.android.synthetic.main.activity_main.*
+import com.example.sopt_27_android.R
+import kotlinx.android.synthetic.main.fragment_port_folio.*
 
-class MainActivity : AppCompatActivity() {
+class PortFolioFragment : Fragment() {
     private lateinit var profileAdapter: ProfileAdapter
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_main)
+    override fun onCreateView(
+        inflater: LayoutInflater, container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View? {
+        // 아래 한줄이 있어야 액티비티보다 프레그먼트의 메뉴가 우선시 됨
+        setHasOptionsMenu(true)
 
-        // ISLOGIN 이라는 파일 안에 사용자 로그인 상태 저장됨
-        val loginpref = getSharedPreferences("ISLOGIN", Context.MODE_PRIVATE)
-        val editor = loginpref.edit()
-        editor.putBoolean("AUTO_LOGIN", true)
-        editor.apply()
+        // Inflate the layout for this fragment
+        return inflater.inflate(R.layout.fragment_port_folio, container, false)
+    }
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+
 
         // 어댑터에 context 객체를 파라미터로 전달
-        profileAdapter =
-            ProfileAdapter(this)
+        profileAdapter = ProfileAdapter(view.context)
 
         rv_profile.adapter = profileAdapter
-        rv_profile.layoutManager = LinearLayoutManager(this)
+        rv_profile.layoutManager = LinearLayoutManager(view.context)
 
         // Scope Function을 이용하여 위의 코드를 아래처럼 간단하게 쓸 수 있음
 //        rv_profile.apply{
@@ -58,13 +61,13 @@ class MainActivity : AppCompatActivity() {
 
 
     // 리사이클러뷰 레이아웃 선택 변경
-    override fun onCreateOptionsMenu(menu: Menu?): Boolean {
-        menuInflater.inflate(R.menu.bar, menu)
-        return true
+    override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
+        super.onCreateOptionsMenu(menu, inflater)
+        inflater.inflate(R.menu.bar, menu)
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        when(item?.itemId){
+        when (item?.itemId) {
 //            R.id.logout -> {
 //                val mainintent = Intent(MainActivity)
 //            }
@@ -72,16 +75,17 @@ class MainActivity : AppCompatActivity() {
             R.id.linear -> {
                 profileAdapter.changeViewType = 1
                 rv_profile.apply {
-                    layoutManager = LinearLayoutManager(this@MainActivity)
+                    layoutManager = LinearLayoutManager(view?.context)
                 }
             }
             R.id.grid -> {
                 profileAdapter.changeViewType = 2
                 rv_profile.apply {
-                    layoutManager = GridLayoutManager(this@MainActivity,2)
+                    layoutManager = GridLayoutManager(view?.context, 2)
                 }
             }
         }
         return super.onOptionsItemSelected(item)
     }
 }
+

@@ -1,13 +1,22 @@
-package com.example.sopt_27_android
+package com.example.sopt_27_android.activity
 
 import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import android.util.Log
 import android.widget.Toast
+import com.example.sopt_27_android.R
+import com.example.sopt_27_android.data.RequestSignIn
+import com.example.sopt_27_android.data.ResponseSignIn
+import com.example.sopt_27_android.network.SignServiceImpl
 import kotlinx.android.synthetic.main.activity_sign_in.*
+import kotlinx.android.synthetic.main.activity_sign_up.*
+import okhttp3.ResponseBody
+import org.json.JSONObject
+import retrofit2.Call
+import retrofit2.Callback
+import retrofit2.Response
 
 class SignInActivity : AppCompatActivity() {
     val REQUEST_CODE = 1
@@ -17,16 +26,36 @@ class SignInActivity : AppCompatActivity() {
         setContentView(R.layout.activity_sign_in)
 
         // 로그인 버튼
-        btn_login.setOnClickListener{
-            if(et_id.text.isNullOrBlank() || et_pw.text.isNullOrBlank()){
+        btn_login.setOnClickListener {
+            if (et_id.text.isNullOrBlank() || et_pw.text.isNullOrBlank()) {
                 Toast.makeText(this, "빈칸이 있습니다.", Toast.LENGTH_SHORT).show()
-            }
-            else{
-                Toast.makeText(this, "로그인 되었습니다.", Toast.LENGTH_SHORT).show()
-                val intent = Intent(this, MainActivity::class.java)
-                startActivity(intent)
+            } else {
+                // 서버 통신
+                SignServiceImpl.signinservice.requestSignIn(
+                    RequestSignIn(
+                        email = et_id.text.toString(),
+                        password = et_pw.text.toString()
+                    )
+                ).enqueue(object : Callback<ResponseSignIn> {
+                    override fun onResponse(
+                        call: Call<ResponseSignIn>,
+                        response: Response<ResponseSignIn>
+                    ) {
+                        if (response.isSuccessful) {
+                            Toast.makeText(this@SignInActivity, "로그인 되었습니다.", Toast.LENGTH_SHORT).show()
+                            val intent = Intent(this@SignInActivity, MainActivity::class.java)
+                            startActivity(intent)
+                        }else {
+                            showError(response.errorBody())
+                        }
+                    }
+                    override fun onFailure(call: Call<ResponseSignIn>, t: Throwable) {
+                        Toast.makeText(this@SignInActivity, "로그인 실패", Toast.LENGTH_SHORT).show()
+                    }
+                })
             }
         }
+
 
         // 회원가입 버튼
         tv_join.setOnClickListener{
@@ -39,6 +68,13 @@ class SignInActivity : AppCompatActivity() {
         if(loginpref.getBoolean("AUTO_LOGIN", false)){
             startActivity(Intent(this, MainActivity::class.java))
         }
+    }
+
+
+    private fun showError(error : ResponseBody?){
+        val e = error ?: return
+        val ob = JSONObject(e.string())
+        Toast.makeText(this, ob.getString("message"),Toast.LENGTH_SHORT).show()
     }
 
     // onActivityResult: main액티비티에서 sub액티비티를 호출하여 넘어갔다가, 다시 main 액티비티로 돌아올때 사용되는 기본 메소드

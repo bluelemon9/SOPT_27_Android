@@ -30,7 +30,7 @@
         android:text="제목"
         android:textSize="20sp"
         android:textStyle="bold"
-        android:textColor="#6200EE"
+        android:textColor="#ffd500"
         app:layout_constraintStart_toEndOf="@+id/item_photo"
         app:layout_constraintTop_toTopOf="parent"
         android:layout_marginLeft="20dp"

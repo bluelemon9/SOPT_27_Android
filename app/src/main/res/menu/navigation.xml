@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:id="@+id/menu_me"
+        android:icon="@drawable/ic_me"
+        android:checked="false"
+        android:title="Me" />
+    <item
+        android:id="@+id/menu_portfolio"
+        android:icon="@drawable/ic_portfolio"
+        android:title="Portfolio" />
+    <item
+        android:id="@+id/menu_setting"
+        android:icon="@drawable/ic_setting"
+        android:title="Setting" />
+</menu>

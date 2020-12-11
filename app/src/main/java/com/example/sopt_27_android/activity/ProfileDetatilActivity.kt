@@ -1,7 +1,8 @@
-package com.example.sopt_27_android
+package com.example.sopt_27_android.activity
 
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import com.example.sopt_27_android.R
 import kotlinx.android.synthetic.main.activity_profile_detatil.*
 
 class ProfileDetatilActivity : AppCompatActivity() {

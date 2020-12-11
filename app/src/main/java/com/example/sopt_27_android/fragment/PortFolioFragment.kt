@@ -1,6 +1,7 @@
 package com.example.sopt_27_android.fragment
 
 import android.os.Bundle
+import android.util.Log
 import android.view.*
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.GridLayoutManager
@@ -8,7 +9,12 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.sopt_27_android.ProfileRV.ProfileAdapter
 import com.example.sopt_27_android.ProfileRV.ProfileData
 import com.example.sopt_27_android.R
+import com.example.sopt_27_android.data.ResponsePractice
+import com.example.sopt_27_android.network.PracticeServiceImpl
 import kotlinx.android.synthetic.main.fragment_port_folio.*
+import retrofit2.Call
+import retrofit2.Callback
+import retrofit2.Response
 
 class PortFolioFragment : Fragment() {
     private lateinit var profileAdapter: ProfileAdapter
@@ -27,9 +33,14 @@ class PortFolioFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        var datas: MutableList<ProfileData> = mutableListOf<ProfileData>()
 
-        // 어댑터에 context 객체를 파라미터로 전달
-        profileAdapter = ProfileAdapter(view.context)
+        // 서버 연결
+        profileAdapter= ProfileAdapter(view!!.context, datas)
+
+
+        // 어댑터에 context 객체를 파라미터로 전달 (더미)
+//        profileAdapter = ProfileAdapter(view.context)
 
         rv_profile.adapter = profileAdapter
         rv_profile.layoutManager = LinearLayoutManager(view.context)
@@ -40,23 +51,64 @@ class PortFolioFragment : Fragment() {
 //            layoutManager = LinearLayoutManager(this)
 //        }
 
-        // 이 부분 26기 때랑 표현 방식 약간 다름
-        profileAdapter.data = mutableListOf(
-            ProfileData("이름", "김회진"),
-            ProfileData("나이", "22"),
-            ProfileData("파트", "안드로이드"),
-            ProfileData(
-                "GitHub",
-                "www.github.com/bluelemon9"
-            ),
-            ProfileData(
-                "Blog",
-                "https://blog.naver.com/endjjsft"
-            )
-        )
 
-        // Adapter에 데이터 갱신 알려줌
-        profileAdapter.notifyDataSetChanged()
+
+        // 서버 요청
+        PracticeServiceImpl.service.requestPractice(
+        ).enqueue(object : Callback<ResponsePractice> {
+            override fun onFailure(call: Call<ResponsePractice>, t: Throwable) {
+                Log.d("연습용 서버 연결 실패", "${t}")
+            }
+
+            override fun onResponse(
+                call: Call<ResponsePractice>,
+                response: Response<ResponsePractice>
+            ) {
+                // 통신 성공
+                if (response.isSuccessful) {   // statusCode가 200-300 사이일 때, 응답 body 이용 가능
+                    Log.d("받아온 데이터 ", response.body()!!.data.toString())
+
+                    var i: Int = 0
+                    for (i in 0 until response.body()!!.data.size) {
+
+                        datas.apply {
+                            add(
+                                ProfileData(
+                                    email = "${response.body()!!.data[i].email}",
+                                    first_name = "${response.body()!!.data[i].first_name}",
+                                    avatar = "${response.body()!!.data[i].avatar}"
+                                )
+                            )
+                        }
+                        profileAdapter.notifyDataSetChanged()
+                    }
+                } else {
+                    Log.d("연습용 서버 연결 실패2", "${response.message()}")
+                }
+            }
+        })
+
+
+
+
+
+//        // 이 부분 26기 때랑 표현 방식 약간 다름 (더미)
+//        profileAdapter.data = mutableListOf(
+//            ProfileData("이름", "김회진"),
+//            ProfileData("나이", "22"),
+//            ProfileData("파트", "안드로이드"),
+//            ProfileData(
+//                "GitHub",
+//                "www.github.com/bluelemon9"
+//            ),
+//            ProfileData(
+//                "Blog",
+//                "https://blog.naver.com/endjjsft"
+//            )
+//        )
+//
+//        // Adapter에 데이터 갱신 알려줌
+//        profileAdapter.notifyDataSetChanged()
     }
 
 

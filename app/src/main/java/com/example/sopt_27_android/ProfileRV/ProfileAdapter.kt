@@ -6,8 +6,11 @@ import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.example.sopt_27_android.R
 
-class ProfileAdapter (private val context : Context) : RecyclerView.Adapter<ProfileViewHolder>() {
-    var data = mutableListOf<ProfileData>()
+// 서버 연동
+class ProfileAdapter(private val context : Context, var datas : List<ProfileData>) : RecyclerView.Adapter<ProfileViewHolder>() {
+
+//class ProfileAdapter (private val context : Context) : RecyclerView.Adapter<ProfileViewHolder>() {
+//    var data = mutableListOf<ProfileData>()
     var changeViewType = 1
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ProfileViewHolder {
@@ -36,9 +39,16 @@ class ProfileAdapter (private val context : Context) : RecyclerView.Adapter<Prof
         return changeViewType
     }
 
-    override fun getItemCount(): Int = data.size
+//    // 더미용
+//    override fun getItemCount(): Int = data.size
+//
+//    override fun onBindViewHolder(holder: ProfileViewHolder, position: Int) {
+//        holder.onBind(data[position])
+//    }
+
+    override fun getItemCount(): Int = datas.size
 
     override fun onBindViewHolder(holder: ProfileViewHolder, position: Int) {
-        holder.onBind(data[position])
+        holder.onBind(datas[position])
     }
 }

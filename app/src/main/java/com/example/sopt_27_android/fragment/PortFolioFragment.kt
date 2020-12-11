@@ -5,7 +5,11 @@ import android.util.Log
 import android.view.*
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.GridLayoutManager
+import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
+import com.example.sopt_27_android.ProfileRV.ItemDragListener
+import com.example.sopt_27_android.ProfileRV.ItemTouchHelperCallback
 import com.example.sopt_27_android.ProfileRV.ProfileAdapter
 import com.example.sopt_27_android.ProfileRV.ProfileData
 import com.example.sopt_27_android.R
@@ -16,8 +20,9 @@ import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
 
-class PortFolioFragment : Fragment() {
+class PortFolioFragment : Fragment(), ItemDragListener {
     private lateinit var profileAdapter: ProfileAdapter
+    private lateinit var itemTouchHelper: ItemTouchHelper
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -36,8 +41,7 @@ class PortFolioFragment : Fragment() {
         var datas: MutableList<ProfileData> = mutableListOf<ProfileData>()
 
         // 서버 연결
-        profileAdapter= ProfileAdapter(view!!.context, datas)
-
+        profileAdapter= ProfileAdapter(view.context, datas)
 
         // 어댑터에 context 객체를 파라미터로 전달 (더미)
 //        profileAdapter = ProfileAdapter(view.context)
@@ -45,12 +49,17 @@ class PortFolioFragment : Fragment() {
         rv_profile.adapter = profileAdapter
         rv_profile.layoutManager = LinearLayoutManager(view.context)
 
+
+        // ItemTouchHelperCallback을 파라미터로 하는 ItemTouchHelper를 생성하고 RecyclerView에 연결
+        itemTouchHelper = ItemTouchHelper(ItemTouchHelperCallback(profileAdapter))
+        itemTouchHelper.attachToRecyclerView(rv_profile)
+
+
         // Scope Function을 이용하여 위의 코드를 아래처럼 간단하게 쓸 수 있음
 //        rv_profile.apply{
 //            adapter = profileAdapter
 //            layoutManager = LinearLayoutManager(this)
 //        }
-
 
 
         // 서버 요청
@@ -138,6 +147,10 @@ class PortFolioFragment : Fragment() {
             }
         }
         return super.onOptionsItemSelected(item)
+    }
+
+    override fun onStartDrag(viewHolder: RecyclerView.ViewHolder) {
+        itemTouchHelper.startDrag(viewHolder)
     }
 }
 

@@ -1,7 +1,9 @@
 package com.example.sopt_27_android.ProfileRV
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.content.Intent
+import android.view.MotionEvent
 import android.view.View
 import android.widget.ImageView
 import android.widget.TextView

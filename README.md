@@ -1,6 +1,5 @@
 # :star: 전체 실행 모습 :star:
-<img src="https://user-images.githubusercontent.com/62381385/101903504-ba179280-3bf7-11eb-84e6-d124a2a20cd6.gif" width="40%">
-
+<img src="https://user-images.githubusercontent.com/62381385/101958348-7ac46280-3c46-11eb-884d-7b2f96f3643e.gif" width="40%">
 <br><br>
 
 # :star: 1차 세미나 :star:
@@ -119,6 +118,112 @@ if(loginpref.getBoolean("AUTO_LOGIN", false)){
     startActivity(Intent(this, MainActivity::class.java))
 ```
 종료 시 다시 접속해도 로그인 유지될 수 있도록 한다.
+
+<br>
+
+## 코드 & 리드미 수정   
+### 1. MySharedPreferences 파일 생성
+```kotlin
+object MySharedPreferences {
+    private val USER : String = "user"
+
+    fun setId(context: Context, input: String) {
+        val prefs : SharedPreferences = context.getSharedPreferences(USER, Context.MODE_PRIVATE)
+        val editor : SharedPreferences.Editor = prefs.edit()
+        editor.putString("USER_ID", input)
+        editor.apply()
+    }
+
+    fun getId(context: Context) : String {
+        val prefs : SharedPreferences = context.getSharedPreferences(USER, Context.MODE_PRIVATE)
+        return prefs.getString("USER_ID", "").toString()
+    }
+
+    fun setPw(context: Context, input: String) {
+        val prefs : SharedPreferences = context.getSharedPreferences(USER, Context.MODE_PRIVATE)
+        val editor : SharedPreferences.Editor = prefs.edit()
+        editor.putString("USER_PW", input)
+        editor.apply()
+    }
+
+    fun getPw(context: Context) : String {
+        val prefs : SharedPreferences = context.getSharedPreferences(USER, Context.MODE_PRIVATE)
+        return prefs.getString("USER_PW", "").toString()
+    }
+
+    fun clearUser(context: Context) {
+        val prefs : SharedPreferences = context.getSharedPreferences(USER, Context.MODE_PRIVATE)
+        val editor : SharedPreferences.Editor = prefs.edit()
+        editor.clear()
+        editor.apply()
+    }
+}
+```
+
+<br>
+
+### 2. 로그인 액티비티에서 적용
+- SignInActivity.kt   
+```kotlin
+// SharedPreferences에 정보가 저장되어 있지 않을 때 -> 일반 로그인
+        if(MySharedPreferences.getId(this).isBlank() || MySharedPreferences.getPw(this).isBlank()) {
+            // 로그인 버튼
+            btn_login.setOnClickListener {
+                if (et_id.text.isNullOrBlank() || et_pw.text.isNullOrBlank()) {
+                    Toast.makeText(this, "빈칸이 있습니다.", Toast.LENGTH_SHORT).show()
+                } else {
+                    // 서버 통신
+                    SignServiceImpl.signinservice.requestSignIn(
+                        RequestSignIn(
+                            email = et_id.text.toString(),
+                            password = et_pw.text.toString()
+                        )
+                    ).enqueue(object : Callback<ResponseSignIn> {
+                        override fun onResponse(
+                            call: Call<ResponseSignIn>,
+                            response: Response<ResponseSignIn>
+                        ) {
+                            if (response.isSuccessful) {
+                                // 자동로그인 값 저장
+                                MySharedPreferences.setId(applicationContext, et_id.text.toString())
+                                MySharedPreferences.setPw(applicationContext, et_pw.text.toString())
+
+                                Toast.makeText(this@SignInActivity, "로그인 되었습니다.", Toast.LENGTH_SHORT).show()
+                                val intent = Intent(this@SignInActivity, MainActivity::class.java)
+                                startActivity(intent)
+                            } else {
+                                showError(response.errorBody())
+                            }
+                        }
+
+                        override fun onFailure(call: Call<ResponseSignIn>, t: Throwable) {
+                            Toast.makeText(this@SignInActivity, "로그인 실패", Toast.LENGTH_SHORT).show()
+                        }
+                    })
+                }
+            }
+        } else {
+            // SharedPreferences에 값이 저장되어 있을 때 -> 자동 로그인
+            Toast.makeText(this, "자동로그인 되었습니다.", Toast.LENGTH_SHORT).show()
+            val intent = Intent(this, MainActivity::class.java)
+            startActivity(intent)
+            finish()
+        }
+```
+
+<br>
+
+### 3. 로그아웃 기능 추가   
+- MeFragment.kt
+```kotlin
+        btn_logout.setOnClickListener {
+            MySharedPreferences.clearUser(view.context)
+            val intent = Intent(view.context, SignInActivity::class.java)
+            intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or
+                    Intent.FLAG_ACTIVITY_CLEAR_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
+            startActivity(intent)
+        }
+```
 
 <br><br>
 
@@ -258,7 +363,117 @@ rv_profile.layoutManager = GridLayoutManager(this@MainActivity, 2)
 setHasOptionsMenu(true)
 ```
  
- <br><br>
+<br>
+ 
+# [성장과제2] Recyclerview 아이템 이동, 삭제 (20.12.11)
+<img src="https://user-images.githubusercontent.com/62381385/101954404-629d1500-3c3f-11eb-83c3-9f51d2fef749.gif" width="30%">
+
+## 1. ItemTouchHelper   
+- ItemTouchHelper는 RecyclerView.ItemDecoration의 서브 클래스이다. RecyclerView 및 Callback 클래스와 함께 작동하며, 사용자가 이러한 액션을 수행할 때 이벤트를 수신한다. 우리는 지원하는 기능에 따라 메서드를 재정의해서 사용하면 된다.   
+- ItemTouchHelper.Callback은 추상 클래스로 추상 메서드인 getMovementFlags(), onMove(), onSwiped()를 필수로 재정의해야 한다. 아니면 Wrapper 클래스인 ItemTouchHelper.SimpleCallback을 이용해도 된다.   
+
+### ItemDragListener.kt
+```kotlin
+interface ItemDragListener {
+    fun onStartDrag(viewHolder: RecyclerView.ViewHolder)
+}
+```
+이건 굳이 필요한 작업은 아닌 것 같다.   
+
+<br>
+
+### ItemActionListener.kt   
+```kotlin
+interface ItemActionListener {
+    fun onItemMoved(from: Int, to: Int)
+    fun onItemSwiped(position: Int)
+}
+```
+
+<br>
+
+### ItemTouchHelperCallback.kt   
+ItemTouchHelper.Callback을 상속받는 ItemTouchHelperCallback 클래스를 구현(생성자의 파라미터로 ItemActionListener를 받음)
+```kotlin
+class ItemTouchHelperCallback(val listener: ItemActionListener) : ItemTouchHelper.Callback(){
+
+    // Drag 및 Swipe 이벤트의 방향을 지정
+    override fun getMovementFlags(
+        recyclerView: RecyclerView,
+        viewHolder: RecyclerView.ViewHolder
+    ): Int {
+        val dragFlags = ItemTouchHelper.DOWN or ItemTouchHelper.UP
+        val swipeFlags = ItemTouchHelper.START or ItemTouchHelper.END
+        return makeMovementFlags(dragFlags, swipeFlags)
+    }
+
+    // 아이템이 Drag 되면 ItemTouchHelper는 onMove()를 호출함
+    override fun onMove(
+        recyclerView: RecyclerView,
+        viewHolder: RecyclerView.ViewHolder,
+        target: RecyclerView.ViewHolder
+    ): Boolean {
+        listener.onItemMoved(viewHolder.adapterPosition, target.adapterPosition)
+        return true
+    }
+
+    // 아이템이 Swipe 되면 ItemTouchHelper는 범위를 벗어날 때까지 애니메이션을 적용한 후 onSwiped()를 호출함
+    override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) {
+        listener.onItemSwiped(viewHolder.adapterPosition)
+    }
+
+    // 아이템을 길게 누르면 Drag & Drop 작업을 시작해야 하는지를 반환
+    override fun isLongPressDragEnabled(): Boolean = true
+
+    // 스와이프하면 Swipe 작업을 시작해야 하는지를 반환
+    override fun isItemViewSwipeEnabled(): Boolean = true
+}
+```
+
+<br>
+
+### ProfileAdapter.kt   
+어댑터에서는 ItemActionListener 인터페이스를 구현.   
+onItemMoved(), onItemSwiped()을 재정의하여 아이템 이동과 제거 코드를 작성한다. 이때 어댑터가 아이템 변경 사항을 인식할 수 있도록 notifyItemMoved(), notifyItemRemoved()를 호출해야 한다.
+```kotlin
+class ProfileAdapter(private val context : Context, var datas : MutableList<ProfileData>)
+    : RecyclerView.Adapter<ProfileViewHolder>(), ItemActionListener {
+    
+    //...
+    
+    // 드래그해서 위치 이동
+    override fun onItemMoved(from: Int, to: Int) {
+        if(from == to){
+            return
+        }
+        val fromItem = datas.removeAt(from)
+        datas.add(to, fromItem)
+        notifyItemMoved(from, to)
+    }
+
+    // 스와이프해서 삭제
+    override fun onItemSwiped(position: Int) {
+        datas.removeAt(position)
+        notifyItemRemoved(position)
+    }
+}
+```
+
+<br>
+
+### PortFolioFragment.kt   
+RecyclerView가 있는 프래그먼트에서는 ItemDragListener 인터페이스를 구현.   
+onViewCreated()에서 (액티비티일 경우는 onCreate()) ItemTouchHelperCallback을 파라미터로 하는 ItemTouchHelper를 생성하고 RecyclerView에 연결한다.
+ItemTouchHelper.startDrag() 메서드를 호출하는 부분은 굳이 필요한 부분이 아닌 것 같아서 생략함.
+```kotlin
+private lateinit var itemTouchHelper: ItemTouchHelper
+
+// ItemTouchHelperCallback을 파라미터로 하는 ItemTouchHelper를 생성하고 RecyclerView에 연결
+        itemTouchHelper = ItemTouchHelper(ItemTouchHelperCallback(profileAdapter))
+        itemTouchHelper.attachToRecyclerView(rv_profile)
+```
+
+<br><br>
 
 # :star: 3차 세미나 :star:  
 # [과제] BottomNavigation, Tablayout (20.12.11)

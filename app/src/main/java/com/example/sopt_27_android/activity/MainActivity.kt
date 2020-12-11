@@ -1,14 +1,20 @@
 package com.example.sopt_27_android.activity
 
 import android.content.Context
+import android.content.pm.PackageInfo
+import android.content.pm.PackageManager
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.util.Base64
+import android.util.Log
 import androidx.viewpager.widget.ViewPager
 import com.example.sopt_27_android.*
 import com.example.sopt_27_android.fragment.MeFragment
 import com.example.sopt_27_android.fragment.PortFolioFragment
 import com.example.sopt_27_android.fragment.SettingFragment
 import kotlinx.android.synthetic.main.activity_main.*
+import java.security.MessageDigest
+import java.security.NoSuchAlgorithmException
 import kotlin.properties.Delegates
 
 class MainActivity : AppCompatActivity() {
@@ -17,6 +23,8 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+
+//        getHashKey()
 
         // 뷰페이저 세팅
         viewpagerAdapter =
@@ -51,7 +59,7 @@ class MainActivity : AppCompatActivity() {
             when (it.itemId) {
                 R.id.menu_me -> index = 0
                 R.id.menu_portfolio -> index = 1
-                R.id.menu_setting -> index = 2
+                R.id.menu_search -> index = 2
             }
             main_viewpager.currentItem = index
             true
@@ -64,5 +72,30 @@ class MainActivity : AppCompatActivity() {
         editor.putBoolean("AUTO_LOGIN", true)
         editor.apply()
     }
+
+
+//    // KAKAO 서버 통신 해시값 알아내기
+//    fun getHashKey() {
+//        var packageInfo: PackageInfo? = null
+//        try {
+//            packageInfo =
+//                packageManager.getPackageInfo(packageName, PackageManager.GET_SIGNATURES)
+//        } catch (e: PackageManager.NameNotFoundException) {
+//            e.printStackTrace()
+//        }
+//        if (packageInfo == null) Log.e("KeyHash", "KeyHash:null")
+//        for (signature in packageInfo!!.signatures) {
+//            try {
+//                val md: MessageDigest = MessageDigest.getInstance("SHA")
+//                md.update(signature.toByteArray())
+//                Log.d("KeyHash", Base64.encodeToString(md.digest(), Base64.DEFAULT))
+//            } catch (e: NoSuchAlgorithmException) {
+//                Log.e(
+//                    "KeyHash",
+//                    "Unable to get MessageDigest. signature=$signature", e
+//                )
+//            }
+//        }
+//    }
 }
 

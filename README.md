@@ -1,3 +1,7 @@
+# :star: 전체 실행 모습 :star:
+![20201211_211304](https://user-images.githubusercontent.com/62381385/101903504-ba179280-3bf7-11eb-84e6-d124a2a20cd6.gif)
+
+
 # :star: 1차 세미나 :star:
 ![Alt Text](https://i.imgflip.com/4kerns.gif)
 
@@ -248,6 +252,28 @@ rv_profile.layoutManager = GridLayoutManager(this@MainActivity, 2)
 리사이클러뷰 레이아웃을 선택하여 변경할 수 있도록 onCreateOptionsMenu와 onOptionsItemSelected를 오버라이드한다.  
 -> 코드 참고
  
- <br>
- 
+ <br><br>
 
+# :star: 3차 세미나 :star:  
+# [과제] BottomNavigation, Tablayout (20.12.11)
+![Screenshot_20201211-211710_Video Player](https://user-images.githubusercontent.com/62381385/101903937-68bbd300-3bf8-11eb-9bb8-c639633bdd74.jpg)
+### 1.   
+
+<br><br>
+# :star: 6차 세미나 :star:  
+# [과제] 회원가입, 로그인 서버 연결 (20.12.11)
+![signup](https://user-images.githubusercontent.com/62381385/101904964-04017800-3bfa-11eb-83ce-35b6e5e03f9a.JPG)
+![Screenshot_20201211-211629_Video Player](https://user-images.githubusercontent.com/62381385/101903923-63f71f00-3bf8-11eb-89ed-ba8c26af4732.jpg)
+![Screenshot_20201211-211710_Video Player](https://user-images.githubusercontent.com/62381385/101903937-68bbd300-3bf8-11eb-9bb8-c639633bdd74.jpg)
+
+<br>
+
+# [성장과제1] 더미데이터 사이트 서버 연결 (20.12.11)   
+![Screenshot_20201211-211710_Video Player](https://user-images.githubusercontent.com/62381385/101903937-68bbd300-3bf8-11eb-9bb8-c639633bdd74.jpg)
+![Screenshot_20201211-212208_Video Player](https://user-images.githubusercontent.com/62381385/101903934-66f20f80-3bf8-11eb-9608-a0a6a7dd0707.jpg)
+
+<br>   
+
+# [성장과제2] 카카오 웹 검색 API (20.12.11)   
+![Screenshot_20201211-212224_Video Player](https://user-images.githubusercontent.com/62381385/101905100-40cd6f00-3bfa-11eb-9eb0-252b06273f09.jpg)
+      

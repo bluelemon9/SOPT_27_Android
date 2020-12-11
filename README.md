@@ -543,6 +543,9 @@ class ProfileAdapter(private val context : Context, var datas : List<ProfileData
 https://developers.kakao.com/docs/latest/ko/daum-search/dev-guide#search-doc
 
 
+### [0] 카카오 계정 앱 등록  
+-> 해시값 알아오기 (코드 참고)   
+
 ### [1] 리사이클러뷰 만들기
 -> @headers로 키값 넣어주고 @query로 검색할 키워드 넣을 수 있게 함.   
 

@@ -6,6 +6,7 @@ import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import com.example.sopt_27_android.MySharedPreferences
 import com.example.sopt_27_android.R
 import com.example.sopt_27_android.TabAdapter
 import com.example.sopt_27_android.activity.SignInActivity
@@ -25,14 +26,14 @@ class MeFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-//        // 로그아웃 버튼
-//        btn_logout.setOnClickListener {
-//            MySharedPreferences.clearUser(view.context)
-//            val intent = Intent(view.context, SignInActivity::class.java)
-//            intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or
-//                    Intent.FLAG_ACTIVITY_CLEAR_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
-//            startActivity(intent)
-//        }
+        // 로그아웃 버튼
+        btn_logout.setOnClickListener {
+            MySharedPreferences.clearUser(view.context)
+            val intent = Intent(view.context, SignInActivity::class.java)
+            intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or
+                    Intent.FLAG_ACTIVITY_CLEAR_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
+            startActivity(intent)
+        }
 
 
         val tabAdapter = TabAdapter(childFragmentManager)
